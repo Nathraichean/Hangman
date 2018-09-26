@@ -173,7 +173,7 @@ public class Main {
 
                         // Check if there are any tries left, then check if player has guessed the word
                         if (triesLeft == 0){
-                            printInputErrorGameover(header,footer,score);
+                            printInputErrorGameover(header,footer,score,randomWord);
                             score = 0;
                             sleep(2500);
                             break;
@@ -266,9 +266,10 @@ public class Main {
         System.out.println("Returning...");
         System.out.println(footer);
     }
-    public static void printInputErrorGameover(String header, String footer, int score) {
+    public static void printInputErrorGameover(String header, String footer, int score, String word) {
         System.out.println(header);
         System.out.println("0 tries left. It's game over. :(");
+        System.out.println("Your word was : "+word);
         System.out.println("Final score : "+score);
         System.out.println("Returning...");
         System.out.println(footer);
