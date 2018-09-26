@@ -197,10 +197,17 @@ public class Main {
                             break;
                         }
                         else if (input.equals("exit")){
-                            break;
+                            if (triesLeft < 10) {
+                                printNoExit(header, footer, triesLeft);
+                                sleep(2500);
+                                continue;
+                            } else {
+                                break;
+                            }
                         }
                         else if(input.equals("")){
                             printInputErrorGuess(header,footer);
+                            sleep(2500);
                         }
                         else{
                             int count = 0;
