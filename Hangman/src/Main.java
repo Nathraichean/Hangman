@@ -14,7 +14,6 @@ public class Main {
 
         // Initial
         Scanner scanner = new Scanner(System.in);
-        boolean filePresent = false;
         int triesLeft = 10;
         int score = 0;
         ArrayList Categories = new ArrayList<String>();
@@ -24,7 +23,7 @@ public class Main {
         int end = 0;
 
         // Reads the file and puts it into a list.
-        fillListFromFile(FILE_LOCATION_PATH, Categories, filePresent, header, footer);
+        boolean filePresent = fillListFromFile(FILE_LOCATION_PATH, Categories, header, footer);
 
         // Gets the list from the previous function and sorts it in a Map where the key is a category and the value
         // is an ArrayList with all the words related to that category.
@@ -331,7 +330,7 @@ public class Main {
     public static void printAboutGame(String header, String footer){
         System.out.println(header);
         System.out.println("          About the game");
-        System.out.println("* Name: Hangman 1.0");
+        System.out.println("* Name: Hangman 1.1");
         System.out.println("* Made by : Svetozar Blazhev");
         System.out.println("* Studied @ Software University");
         System.out.println("* Made for the 'MentorMate' internship program");
@@ -346,7 +345,8 @@ public class Main {
         System.out.println("*      -Ex. empty inputs, words with no category,");
         System.out.println("*      -Ex. letter capitalization, longer input than needed,");
         System.out.println("*      -Ex. categories with no words, no need to 'guess'");
-        System.out.println("*      -Ex. symbols in words such as '&' or '-' and others.");
+        System.out.println("*      -Ex. symbols in words such as '&' or '-',");
+        System.out.println("*      -Ex. check if file is present and others");
         System.out.println("*   -Functionality made in functions for easy readability");
         System.out.println("*   -Error messages with timers for specific cases");
         System.out.println("*      -(not with error handling, sadly)");
@@ -431,13 +431,11 @@ public class Main {
         }
     }
 
-    public static void fillListFromFile(String path, ArrayList list, Boolean filePresent, String header, String footer) throws IOException {
+    public static boolean fillListFromFile(String path, ArrayList list, String header, String footer) throws IOException {
         File categories = new File(path);
         BufferedReader br;
         try{
            br  = new BufferedReader(new FileReader(categories));
-           filePresent = true;
-
         }
         catch (FileNotFoundException e){
             System.out.println(header);
@@ -446,7 +444,7 @@ public class Main {
             System.out.println();
             System.out.println("Quitting...");
             System.out.println(footer);
-            return;
+            return false;
         }
         String st;
         int count = 0;
@@ -454,5 +452,6 @@ public class Main {
             list.add(count,st);
             count++;
         }
+        return true;
     }
 }
