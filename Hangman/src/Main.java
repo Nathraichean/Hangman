@@ -24,7 +24,7 @@ public class Main {
         int end = 0;
 
         // Reads the file and puts it into a list.
-        fillListFromFile(FILE_LOCATION_PATH, Categories);
+        fillListFromFile(FILE_LOCATION_PATH, Categories, filePresent, header, footer);
 
         // Gets the list from the previous function and sorts it in a Map where the key is a category and the value
         // is an ArrayList with all the words related to that category.
