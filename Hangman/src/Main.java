@@ -8,10 +8,13 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class Main {
+    public static final String FILE_LOCATION_PATH = "src\\Categories.txt";
+    
     public static void main(String[] args) throws IOException {
 
         // Initial
         Scanner scanner = new Scanner(System.in);
+        boolean filePresent = false;
         int triesLeft = 10;
         int score = 0;
         ArrayList Categories = new ArrayList<String>();
@@ -21,12 +24,16 @@ public class Main {
         int end = 0;
 
         // Reads the file and puts it into a list.
-        fillListFromFile("src\\Categories.txt", Categories);
+        fillListFromFile(FILE_LOCATION_PATH, Categories);
 
         // Gets the list from the previous function and sorts it in a Map where the key is a category and the value
         // is an ArrayList with all the words related to that category.
         sortCategoryDataIntoDictionary(Categories, Dictionary);
-
+        
+        // Checks if it found the file at FILE_LOCATION_PATH and if not, does not initialize the program.
+        if (!filePresent){
+            end++;
+        }
 
         // Start of application.
         while (end == 0) {
@@ -418,9 +425,23 @@ public class Main {
         }
     }
 
-    public static void fillListFromFile(String path, ArrayList list) throws IOException {
+    public static void fillListFromFile(String path, ArrayList list, Boolean filePresent, String header, String footer) throws IOException {
         File categories = new File(path);
-        BufferedReader br = new BufferedReader(new FileReader(categories));
+        BufferedReader br;
+        try{
+           br  = new BufferedReader(new FileReader(categories));
+           filePresent = true;
+
+        }
+        catch (FileNotFoundException e){
+            System.out.println(header);
+            System.out.println("Couldn't find file to read.");
+            System.out.println("Please create it @ GameDirectory\\" + FILE_LOCATION_PATH);
+            System.out.println();
+            System.out.println("Quitting...");
+            System.out.println(footer);
+            return;
+        }
         String st;
         int count = 0;
         while ((st = br.readLine()) != null) {
