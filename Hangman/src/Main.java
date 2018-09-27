@@ -356,6 +356,12 @@ public class Main {
         System.out.println("* TO GO BACK TYPE 'exit'");
         System.out.println(footer);
     }
+    public static void printNoExit(String header, String footer, int triesLeft) {
+        System.out.println(header);
+        System.out.println("You can't go back if you've already tried guessing.");
+        System.out.println("Current tries :" + triesLeft);
+        System.out.println(footer);
+    }
 
     public static void sortCategoryDataIntoDictionary(ArrayList Categories, LinkedHashMap Dictionary) {
         if (Categories.size() > 0) {
