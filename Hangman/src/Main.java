@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Main {
     public static final String FILE_LOCATION_PATH = "src\\Categories.txt";
-    
+
     public static void main(String[] args) throws IOException {
 
         // Initial
@@ -28,9 +28,9 @@ public class Main {
         // Gets the list from the previous function and sorts it in a Map where the key is a category and the value
         // is an ArrayList with all the words related to that category.
         sortCategoryDataIntoDictionary(Categories, Dictionary);
-        
+
         // Checks if it found the file at FILE_LOCATION_PATH and if not, does not initialize the program.
-        if (!filePresent){
+        if (!filePresent) {
             end++;
         }
 
@@ -38,6 +38,7 @@ public class Main {
         while (end == 0) {
 
             // Initialize "UI" with score
+            clearConsole();
             System.out.println(header);
             System.out.println("             Type a digit");
             System.out.println();
@@ -52,41 +53,42 @@ public class Main {
             String input = scanner.nextLine();
             // Check if user has given input
             if (input.length() < 1) {
-                // No input so it prints a meesage
+                // No input so it prints a message
                 printInputErrorNumber(header, footer);
                 sleep(2500);
             }
             // Check if input is not from 1 to 4
             else if (!Character.toString(input.charAt(0)).matches(regex)) {
-                // No input so it prints a meesage
+                // No input so it prints a message
                 printInputErrorNumber(header, footer);
                 sleep(2500);
             } else {
                 switch (Character.toString(input.charAt(0))) {
                     case "1": //Play
+                        clearConsole();
                         score = game(Dictionary, header, footer, scanner, triesLeft, score);
                         break;
                     case "2": //How to play
-                        printHowToPlay(header,footer);
-                        while(true){
+                        printHowToPlay(header, footer);
+                        while (true) {
                             String back = scanner.nextLine();
-                            if (back.contains("exit")){
+                            if (back.contains("exit")) {
                                 break;
                             }
                         }
                         break;
                     case "3": // About this game
-                        printAboutGame(header,footer);
-                        while(true){
+                        printAboutGame(header, footer);
+                        while (true) {
                             String back = scanner.nextLine();
-                            if (back.contains("exit")){
+                            if (back.contains("exit")) {
                                 break;
                             }
                         }
                         break;
                     case "4": // Quit
                         end++;
-                        printQuitGame(header,footer,score);
+                        printQuitGame(header, footer, score);
                         break;
                     default:
                         printInputErrorNumber(header, footer);
@@ -97,13 +99,6 @@ public class Main {
             }
         }
     }
-
-
-
-
-
-
-
 
 
     public static int game(LinkedHashMap<String, ArrayList<String>> Dictionary, String header, String footer, Scanner scanner, int triesLeft, int score) {
@@ -119,23 +114,15 @@ public class Main {
             while (end == 0) {
                 triesLeft = 10;
                 // Print all categories
-                System.out.println(header);
-                for (Object key : Dictionary.keySet()) {
-                    System.out.println("*" + key);
-                }
-                System.out.println();
-                System.out.println("Please write the category you wish to play.");
-                System.out.println("You have to spell the category correctly.");
-                System.out.println("Case insensitive. To go back type 'exit'.");
-                System.out.println(footer);
+                printAllCategories(header, footer, Dictionary);
 
                 // Get input
                 String categoryInput = scanner.nextLine();
                 // Check for empty input
                 String categoryInputCapitalised = "";
-                if (!categoryInput.equals("")){
+                if (!categoryInput.equals("")) {
                     categoryInputCapitalised = categoryInput.substring(0, 1).toUpperCase()
-                        + categoryInput.substring(1).toLowerCase();
+                            + categoryInput.substring(1).toLowerCase();
                 }
                 String chosenCategory = null;
                 ArrayList categoryWords;
@@ -144,7 +131,11 @@ public class Main {
                 StringBuilder randomWordBlank = new StringBuilder(50);
 
                 // Check if input is empty
-                if (categoryInput.equals("")){ printInputErrorCategory(header, footer);sleep(2500); continue;}
+                if (categoryInput.equals("")) {
+                    printInputErrorCategory(header, footer);
+                    sleep(2500);
+                    continue;
+                }
                 // Save chosen Category, its Words, get random word from Words and create blank template to show to user.
                 else if (Dictionary.containsKey(categoryInputCapitalised)) {
                     chosenCategory = categoryInputCapitalised;
@@ -155,38 +146,36 @@ public class Main {
                     // upon visualization.
                     for (int i = 0; i < randomWord.length(); i++) {
                         //randomWordBlank.setCharAt(i, '_');
-                        if (randomWord.charAt(i) == ' '){
+                        if (randomWord.charAt(i) == ' ') {
                             randomWordBlank.append('*');
-                        }
-                        else if(Character.toString(randomWord.charAt(i)).matches("[!@#$%^&(){}+-]")){
+                        } else if (Character.toString(randomWord.charAt(i)).matches("[!@#$%^&(){}+-]")) {
                             randomWordBlank.append(randomWord.charAt(i));
-                        }
-                        else{
+                        } else {
                             randomWordBlank.append('_');
                         }
                     }
 
                     // Start of word guess screen
-                    while(true){
+                    while (true) {
+                        clearConsole();
                         System.out.println(header);
                         System.out.println("Please input a single letter or try and \nguess the whole word/s in one go.");
-                        System.out.println("Category: "+chosenCategory);
+                        System.out.println("Category: " + chosenCategory);
                         System.out.println();
-                        System.out.print(randomWordBlank.toString().replace("", " ").trim().replaceAll("[*]","")+"    ");
+                        System.out.print(randomWordBlank.toString().replace("", " ").trim().replaceAll("[*]", "") + "    ");
                         System.out.println("Guesses : " + guesses);
                         System.out.println("\nTries left : " + triesLeft + "    To go back, type 'exit'.");
                         System.out.println(footer);
 
                         // Check if there are any tries left, then check if player has guessed the word
-                        if (triesLeft == 0){
-                            printInputErrorGameover(header,footer,score,randomWord);
+                        if (triesLeft == 0) {
+                            printInputErrorGameover(header, footer, score, randomWord);
                             score = 0;
                             sleep(2500);
                             break;
-                        }
-                        else if (!randomWordBlank.toString().contains("_")){
+                        } else if (!randomWordBlank.toString().contains("_")) {
                             score++;
-                            printGameWin(header,footer,randomWord,score);
+                            printGameWin(header, footer, randomWord, score);
                             sleep(3000);
                             break;
                         }
@@ -196,13 +185,12 @@ public class Main {
                         // Check if input is "exit", then if input is empty, then compare input to every letter from
                         // the word. If they match -> replace underscore with input. If there are no matches,
                         // reduce tries left.
-                        if (input.toUpperCase().equals(randomWord)){
+                        if (input.toUpperCase().equals(randomWord)) {
                             score++;
-                            printGameWin(header,footer,randomWord,score);
+                            printGameWin(header, footer, randomWord, score);
                             sleep(3000);
                             break;
-                        }
-                        else if (input.equals("exit")){
+                        } else if (input.equals("exit")) {
                             if (triesLeft < 10) {
                                 printNoExit(header, footer, triesLeft);
                                 sleep(2500);
@@ -210,28 +198,26 @@ public class Main {
                             } else {
                                 break;
                             }
-                        }
-                        else if(input.equals("")){
-                            printInputErrorGuess(header,footer);
+                        } else if (input.equals("")) {
+                            printInputErrorGuess(header, footer);
                             sleep(2500);
-                        }
-                        else{
+                        } else {
                             int count = 0;
-                            guesses+=input.toUpperCase().charAt(0)+", ";
+                            guesses += input.toUpperCase().charAt(0) + ", ";
                             for (int i = 0; i < randomWord.length(); i++) {
-                                if(randomWord.charAt(i) == input.toUpperCase().charAt(0)){
-                                    randomWordBlank.setCharAt(i,randomWord.charAt(i));
+                                if (randomWord.charAt(i) == input.toUpperCase().charAt(0)) {
+                                    randomWordBlank.setCharAt(i, randomWord.charAt(i));
                                     count++;
                                 }
                             }
-                            if (count == 0){
+                            if (count == 0) {
                                 triesLeft--;
                             }
                         }
                     }
                 }
                 // For exiting the category menu.
-                else if (categoryInput.equals("exit")){
+                else if (categoryInput.equals("exit")) {
                     end++;
                 }
                 // If player has entered an invalid category or has misspelled 'exit'.
@@ -254,6 +240,7 @@ public class Main {
     }
 
     public static void printInputErrorNumber(String header, String footer) {
+        clearConsole();
         System.out.println(header);
         System.out.println("You have to enter a number from 1 to 4.");
         System.out.println("Returning...");
@@ -261,41 +248,52 @@ public class Main {
     }
 
     public static void printInputErrorCategory(String header, String footer) {
+        clearConsole();
         System.out.println(header);
         System.out.println("Invalid category. Please check spelling.");
         System.out.println("Returning...");
         System.out.println(footer);
     }
+
     public static void printInputErrorGuess(String header, String footer) {
+        clearConsole();
         System.out.println(header);
         System.out.println("Invalid guess. Please enter at least one character.");
         System.out.println("Returning...");
         System.out.println(footer);
     }
+
     public static void printInputErrorGameover(String header, String footer, int score, String word) {
+        clearConsole();
         System.out.println(header);
         System.out.println("0 tries left. It's game over. :(");
-        System.out.println("Your word was : "+word);
-        System.out.println("Final score : "+score);
+        System.out.println("Your word was : " + word);
+        System.out.println("Final score : " + score);
         System.out.println("Returning...");
         System.out.println(footer);
     }
-    public static void printGameWin(String header, String footer, String word, int score){
+
+    public static void printGameWin(String header, String footer, String word, int score) {
+        clearConsole();
         System.out.println(header);
         System.out.println("Congratulations! You won! :)");
         System.out.println("The word was '" + word + "'.");
-        System.out.println("Score + 1 (Total: "+score+").");
+        System.out.println("Score + 1 (Total: " + score + ").");
         System.out.println(footer);
     }
-    public static void printQuitGame(String header, String footer, int score){
+
+    public static void printQuitGame(String header, String footer, int score) {
+        clearConsole();
         System.out.println(header);
         System.out.println("Sorry to see you go!");
-        System.out.println("Final score: "+score);
+        System.out.println("Final score: " + score);
         System.out.println();
         System.out.println("Quitting...");
         System.out.println(footer);
     }
-    public static void printHowToPlay(String header, String footer){
+
+    public static void printHowToPlay(String header, String footer) {
+        clearConsole();
         System.out.println(header);
         System.out.println("                  How to play");
         System.out.println();
@@ -327,7 +325,9 @@ public class Main {
         System.out.println(" TO GO BACK TYPE 'exit'");
         System.out.println(footer);
     }
-    public static void printAboutGame(String header, String footer){
+
+    public static void printAboutGame(String header, String footer) {
+        clearConsole();
         System.out.println(header);
         System.out.println("          About the game");
         System.out.println("* Name: Hangman 1.1");
@@ -356,11 +356,30 @@ public class Main {
         System.out.println("* TO GO BACK TYPE 'exit'");
         System.out.println(footer);
     }
+
     public static void printNoExit(String header, String footer, int triesLeft) {
+        clearConsole();
         System.out.println(header);
         System.out.println("You can't go back if you've already tried guessing.");
         System.out.println("Current tries :" + triesLeft);
         System.out.println(footer);
+    }
+
+    public static void printAllCategories(String header, String footer, LinkedHashMap Dictionary) {
+        clearConsole();
+        System.out.println(header);
+        for (Object key : Dictionary.keySet()) {
+            System.out.println("*" + key);
+        }
+        System.out.println();
+        System.out.println("Please write the category you wish to play.");
+        System.out.println("You have to spell the category correctly.");
+        System.out.println("Case insensitive. To go back type 'exit'.");
+        System.out.println(footer);
+    }
+
+    public static void clearConsole() {
+        System.out.println(new String(new char[30]).replace("\0", "\r\n"));
     }
 
     public static void sortCategoryDataIntoDictionary(ArrayList Categories, LinkedHashMap Dictionary) {
@@ -380,7 +399,7 @@ public class Main {
 
                 String placeholder = category.toString().trim();
                 String placeholderFirst = Character.toString(placeholder.charAt(0));
-                if (Character.toString(placeholder.charAt(0)).equals("")){
+                if (Character.toString(placeholder.charAt(0)).equals("")) {
                     placeholderFirst = Character.toString(placeholder.charAt(1));
                 }
 
@@ -434,10 +453,10 @@ public class Main {
     public static boolean fillListFromFile(String path, ArrayList list, String header, String footer) throws IOException {
         File categories = new File(path);
         BufferedReader br;
-        try{
-           br  = new BufferedReader(new FileReader(categories));
-        }
-        catch (FileNotFoundException e){
+        try {
+            br = new BufferedReader(new FileReader(categories));
+        } catch (FileNotFoundException e) {
+            clearConsole();
             System.out.println(header);
             System.out.println("Couldn't find file to read.");
             System.out.println("Please create it @ GameDirectory\\" + FILE_LOCATION_PATH);
@@ -449,7 +468,7 @@ public class Main {
         String st;
         int count = 0;
         while ((st = br.readLine()) != null) {
-            list.add(count,st);
+            list.add(count, st);
             count++;
         }
         return true;
