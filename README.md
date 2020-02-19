@@ -1,5 +1,6 @@
 # Hangman
-Java hangman console application for MentorMate
+
+My attempt at making a Hangman console application.
 
 Made by Svetozar Blazhev  
 Made in IntelliJ with Java  
