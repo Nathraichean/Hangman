@@ -7,17 +7,20 @@ import java.sql.SQLOutput;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static java.lang.Boolean.FALSE;
+
 public class Main {
     public static final String FILE_LOCATION_PATH = "src\\Categories.txt";
+    public static final int TRIES_COUNT = 8;
 
     public static void main(String[] args) throws IOException {
 
         // Initial
         Scanner scanner = new Scanner(System.in);
-        int triesLeft = 10;
+        int triesLeft = TRIES_COUNT;
         int score = 0;
         ArrayList Categories = new ArrayList<String>();
-        String header = "=======================================\n~~~~~~~~~~~~~~~~Hangman~~~~~~~~~~~~~~~~\n";
+        String header = "=======================================\n~~~~~~~~~~~~~~~ Hangman ~~~~~~~~~~~~~~~\n";
         String footer = "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n=======================================\n";
         LinkedHashMap Dictionary = new LinkedHashMap<String, ArrayList<String>>();
         int end = 0;
@@ -101,6 +104,17 @@ public class Main {
     }
 
 
+
+
+
+
+
+
+
+
+
+    // Main game function, other functions below
+
     public static int game(LinkedHashMap<String, ArrayList<String>> Dictionary, String header, String footer, Scanner scanner, int triesLeft, int score) {
         // Check if Dictionary is filled
         if (Dictionary.size() < 1) {
@@ -112,34 +126,38 @@ public class Main {
         } else {
             int end = 0;
             while (end == 0) {
-                triesLeft = 10;
-                // Print all categories
-                printAllCategories(header, footer, Dictionary);
 
-                // Get input
-                String categoryInput = scanner.nextLine();
-                // Check for empty input
-                String categoryInputCapitalised = "";
-                if (!categoryInput.equals("")) {
-                    categoryInputCapitalised = categoryInput.substring(0, 1).toUpperCase()
-                            + categoryInput.substring(1).toLowerCase();
-                }
+                // Init.
                 String chosenCategory = null;
                 ArrayList categoryWords;
                 String randomWord = null;
                 String guesses = "";
                 StringBuilder randomWordBlank = new StringBuilder(50);
+                triesLeft = TRIES_COUNT;
 
-                // Check if input is empty
+                // Print all categories
+                printAllCategories(header, footer, Dictionary);
+
+                // Get input
+                String categoryInput = scanner.nextLine();
+                // Check if the input contains data and then convert that data into a format of upper/lower case such as " Example "
+                String categoryInputCapitalised = "";
+                if (!categoryInput.equals("")) {
+                    categoryInputCapitalised = categoryInput.substring(0, 1).toUpperCase()
+                            + categoryInput.substring(1).toLowerCase();
+                }
+
+                // Check if input is empty and prints error
                 if (categoryInput.equals("")) {
                     printInputErrorCategory(header, footer);
                     sleep(2500);
                     continue;
                 }
+                // Condition is to check if the formatted input has a match in the categories dictionary, then ->
                 // Save chosen Category, its Words, get random word from Words and create blank template to show to user.
                 else if (Dictionary.containsKey(categoryInputCapitalised)) {
                     chosenCategory = categoryInputCapitalised;
-                    categoryWords = (ArrayList) Dictionary.get(categoryInputCapitalised);
+                    categoryWords = (ArrayList) Dictionary.get(chosenCategory);
                     randomWord = (String) categoryWords.get(new Random().nextInt(categoryWords.size()));
 
                     // Fill blank word with underscores, if there is a space, replace with "*" which will be deleted
@@ -148,7 +166,7 @@ public class Main {
                         //randomWordBlank.setCharAt(i, '_');
                         if (randomWord.charAt(i) == ' ') {
                             randomWordBlank.append('*');
-                        } else if (Character.toString(randomWord.charAt(i)).matches("[!@#$%^&(){}+-]")) {
+                        } else if (Character.toString(randomWord.charAt(i)).matches("[0-9:=;!Q@\\\\#\"$.,%^&\\[\\]/(){}+'\\-]")) {
                             randomWordBlank.append(randomWord.charAt(i));
                         } else {
                             randomWordBlank.append('_');
@@ -165,13 +183,14 @@ public class Main {
                         System.out.print(randomWordBlank.toString().replace("", " ").trim().replaceAll("[*]", "") + "    ");
                         System.out.println("Guesses : " + guesses);
                         System.out.println("\nTries left : " + triesLeft + "    To go back, type 'exit'.");
+                        printHangman(triesLeft);
                         System.out.println(footer);
 
-                        // Check if there are any tries left, then check if player has guessed the word
+                        // Check if there are any tries left, then check if player has guessed the word and stop game if yes
                         if (triesLeft == 0) {
                             printInputErrorGameover(header, footer, score, randomWord);
                             score = 0;
-                            sleep(2500);
+                            sleep(4000);
                             break;
                         } else if (!randomWordBlank.toString().contains("_")) {
                             score++;
@@ -180,30 +199,46 @@ public class Main {
                             break;
                         }
 
+                        // Get guess input
                         String input = scanner.nextLine();
 
-                        // Check if input is "exit", then if input is empty, then compare input to every letter from
-                        // the word. If they match -> replace underscore with input. If there are no matches,
-                        // reduce tries left.
+
+                        // Checks if the input matches the random word. It also formats the guess in the word format
                         if (input.toUpperCase().equals(randomWord)) {
                             score++;
                             printGameWin(header, footer, randomWord, score);
                             sleep(3000);
                             break;
-                        } else if (input.equals("exit")) {
-                            if (triesLeft < 10) {
+                        }
+                        // Checks if the input is exit and if
+                        else if (input.equals("exit")) {
+                            if (triesLeft < TRIES_COUNT) {
                                 printNoExit(header, footer, triesLeft);
                                 sleep(2500);
                                 continue;
                             } else {
                                 break;
                             }
-                        } else if (input.equals("")) {
+                        }
+                        else if (input.equals("") || input.trim().equals("")) {
                             printInputErrorGuess(header, footer);
+                            sleep(3000);
+                        }
+                        else if (input.toCharArray().length > 1){
+                            printInvalidInputMultipleCharacters(header,footer);
+                            sleep(3000);
+                        }
+                        else if (input.matches("[0-9:=*_;!Q@\\\\#\"$.,%^&\\[\\]/(){}+'\\-]")){
+                            printInvalidInputSymbolsNumbers(header,footer);
+                            sleep(3500);
+                        }
+                        else if (guesses.contains(input.toUpperCase())){
+                            printAlreadyGuessedLetter(header, footer);
                             sleep(2500);
-                        } else {
+                        }
+                        else {
                             int count = 0;
-                            guesses += input.toUpperCase().charAt(0) + ", ";
+                            guesses += input.toUpperCase() + ", ";
                             for (int i = 0; i < randomWord.length(); i++) {
                                 if (randomWord.charAt(i) == input.toUpperCase().charAt(0)) {
                                     randomWordBlank.setCharAt(i, randomWord.charAt(i));
@@ -231,6 +266,23 @@ public class Main {
         return score;
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // All functions used, below.
+
+
+    // Waits given time
     public static void sleep(int time) {
         try {
             Thread.sleep(time);
@@ -239,6 +291,7 @@ public class Main {
         }
     }
 
+    // Prints error for wrong input in menu
     public static void printInputErrorNumber(String header, String footer) {
         clearConsole();
         System.out.println(header);
@@ -247,6 +300,7 @@ public class Main {
         System.out.println(footer);
     }
 
+    // Prints error for wrong input in category selection
     public static void printInputErrorCategory(String header, String footer) {
         clearConsole();
         System.out.println(header);
@@ -255,6 +309,7 @@ public class Main {
         System.out.println(footer);
     }
 
+    // Prints error for when trying to input blank in word guess
     public static void printInputErrorGuess(String header, String footer) {
         clearConsole();
         System.out.println(header);
@@ -263,6 +318,7 @@ public class Main {
         System.out.println(footer);
     }
 
+    // Prints end game screen when all tries are used up
     public static void printInputErrorGameover(String header, String footer, int score, String word) {
         clearConsole();
         System.out.println(header);
@@ -270,6 +326,7 @@ public class Main {
         System.out.println("Your word was : " + word);
         System.out.println("Final score : " + score);
         System.out.println("Returning...");
+        printHangman(0);
         System.out.println(footer);
     }
 
@@ -289,6 +346,56 @@ public class Main {
         System.out.println("Final score: " + score);
         System.out.println();
         System.out.println("Quitting...");
+        System.out.println(footer);
+    }
+
+    // Prints error upon trying to input multiple characters while guessing
+    public static void printInvalidInputMultipleCharacters (String header, String footer){
+        clearConsole();
+        System.out.println(header);
+        System.out.println(" Invalid input.");
+        System.out.println();
+        System.out.println(" Please enter a *single* letter.");
+        System.out.println(footer);
+    }
+
+    // Prints error upon trying to enter a symbol or number while guessing.
+    // These symbols/numbers get automatically filled in on the game screen and dont need to be guessed.
+    public static void printInvalidInputSymbolsNumbers (String header, String footer){
+        clearConsole();
+        System.out.println(header);
+        System.out.println(" Guessing symbols and numbers is not necessary.");
+        System.out.println();
+        System.out.println(" They are automatically populated if the word has them. :)");
+        System.out.println(footer);
+    }
+
+    // Prints error message is input has already been guessed before
+    public static void printAlreadyGuessedLetter (String header, String footer){
+        clearConsole();
+        System.out.println(header);
+        System.out.println(" \nYou have already tried guessing this letter.\n");
+        System.out.println(footer);
+    }
+
+    public static void printNoExit(String header, String footer, int triesLeft) {
+        clearConsole();
+        System.out.println(header);
+        System.out.println("You can't go back if you've already tried guessing.");
+        System.out.println("Current tries :" + triesLeft);
+        System.out.println(footer);
+    }
+
+    public static void printAllCategories(String header, String footer, LinkedHashMap Dictionary) {
+        clearConsole();
+        System.out.println(header);
+        for (Object key : Dictionary.keySet()) {
+            System.out.println("*" + key);
+        }
+        System.out.println();
+        System.out.println("Please write the category you wish to play.");
+        System.out.println("You have to spell the category correctly.");
+        System.out.println("Case insensitive. To go back type 'exit'.");
         System.out.println(footer);
     }
 
@@ -330,12 +437,9 @@ public class Main {
         clearConsole();
         System.out.println(header);
         System.out.println("          About the game");
-        System.out.println("* Name: Hangman 1.1");
+        System.out.println("* Name: Hangman 1.2");
         System.out.println("* Made by : Svetozar Blazhev");
         System.out.println("* Studied @ Software University");
-        System.out.println("* Made for the 'MentorMate' internship program");
-        System.out.println("* ");
-        System.out.println("* Time it took: About two days on/off coding");
         System.out.println("*");
         System.out.println("* Functionality:");
         System.out.println("*   -Reads from file");
@@ -354,27 +458,6 @@ public class Main {
         System.out.println("*   -And more ontop of the core hangman functionality.");
         System.out.println("*");
         System.out.println("* TO GO BACK TYPE 'exit'");
-        System.out.println(footer);
-    }
-
-    public static void printNoExit(String header, String footer, int triesLeft) {
-        clearConsole();
-        System.out.println(header);
-        System.out.println("You can't go back if you've already tried guessing.");
-        System.out.println("Current tries :" + triesLeft);
-        System.out.println(footer);
-    }
-
-    public static void printAllCategories(String header, String footer, LinkedHashMap Dictionary) {
-        clearConsole();
-        System.out.println(header);
-        for (Object key : Dictionary.keySet()) {
-            System.out.println("*" + key);
-        }
-        System.out.println();
-        System.out.println("Please write the category you wish to play.");
-        System.out.println("You have to spell the category correctly.");
-        System.out.println("Case insensitive. To go back type 'exit'.");
         System.out.println(footer);
     }
 
@@ -472,5 +555,115 @@ public class Main {
             count++;
         }
         return true;
+    }
+
+    public static void printHangman (int tries){
+
+        switch (tries){
+            case 0 :
+                System.out.println("                            ");
+                System.out.println("       ╔════════════════╣   ");
+                System.out.println("       ║         │          ");
+                System.out.println("       ║         O          ");
+                System.out.println("       ║       ──┼──        ");
+                System.out.println("       ║         │          ");
+                System.out.println("       ║        / \\        ");
+                System.out.println("       ║                    ");
+                System.out.println("       ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ");
+                break;
+            case 1 :
+                System.out.println("                            ");
+                System.out.println("       ╔════════════════╣   ");
+                System.out.println("       ║         │          ");
+                System.out.println("       ║         O          ");
+                System.out.println("       ║       ──┼──        ");
+                System.out.println("       ║         │          ");
+                System.out.println("       ║        /           ");
+                System.out.println("       ║                    ");
+                System.out.println("       ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ");
+                break;
+            case 2 :
+                System.out.println("                            ");
+                System.out.println("       ╔════════════════╣   ");
+                System.out.println("       ║         │          ");
+                System.out.println("       ║         O          ");
+                System.out.println("       ║       ──┼──        ");
+                System.out.println("       ║         │          ");
+                System.out.println("       ║                    ");
+                System.out.println("       ║                    ");
+                System.out.println("       ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ");
+                break;
+            case 3 :
+                System.out.println("                            ");
+                System.out.println("       ╔════════════════╣   ");
+                System.out.println("       ║         │          ");
+                System.out.println("       ║         O          ");
+                System.out.println("       ║       ──┼──        ");
+                System.out.println("       ║                    ");
+                System.out.println("       ║                    ");
+                System.out.println("       ║                    ");
+                System.out.println("       ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ");
+                break;
+            case 4 :
+                System.out.println("                            ");
+                System.out.println("       ╔════════════════╣   ");
+                System.out.println("       ║         │          ");
+                System.out.println("       ║         O          ");
+                System.out.println("       ║       ──┼          ");
+                System.out.println("       ║                    ");
+                System.out.println("       ║                    ");
+                System.out.println("       ║                    ");
+                System.out.println("       ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ");
+                break;
+            case 5 :
+                System.out.println("                            ");
+                System.out.println("       ╔════════════════╣   ");
+                System.out.println("       ║         │          ");
+                System.out.println("       ║         O          ");
+                System.out.println("       ║         ┼          ");
+                System.out.println("       ║                    ");
+                System.out.println("       ║                    ");
+                System.out.println("       ║                    ");
+                System.out.println("       ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ");
+                break;
+            case 6 :
+                System.out.println("                            ");
+                System.out.println("       ╔════════════════╣   ");
+                System.out.println("       ║         │          ");
+                System.out.println("       ║         O          ");
+                System.out.println("       ║                    ");
+                System.out.println("       ║                    ");
+                System.out.println("       ║                    ");
+                System.out.println("       ║                    ");
+                System.out.println("       ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ");
+                break;
+            case 7 :
+                System.out.println("                            ");
+                System.out.println("       ╔════════════════╣   ");
+                System.out.println("       ║         │          ");
+                System.out.println("       ║                    ");
+                System.out.println("       ║                    ");
+                System.out.println("       ║                    ");
+                System.out.println("       ║                    ");
+                System.out.println("       ║                    ");
+                System.out.println("       ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ");
+                break;
+            case 8 :
+                System.out.println("                            ");
+                System.out.println("       ╔════════════════╣   ");
+                System.out.println("       ║                    ");
+                System.out.println("       ║                    ");
+                System.out.println("       ║                    ");
+                System.out.println("       ║                    ");
+                System.out.println("       ║                    ");
+                System.out.println("       ║                    ");
+                System.out.println("       ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ");
+                break;
+            default :
+                System.out.println("Unknown tries left!");
+                break;
+        }
+
+
     }
 }
